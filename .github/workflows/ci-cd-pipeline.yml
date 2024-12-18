@@ -1,0 +1,48 @@
+name: CI/CD Pipeline for React App
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      # 1. Checkout the code
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      # 2. Set up Node.js
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+
+      # 3. Install Dependencies
+      - name: Install Dependencies
+        run: npm install
+
+      # 4. Lint Code (optional)
+      - name: Run ESLint
+        run: npm run lint
+        continue-on-error: true # This ensures workflow doesn't fail for warnings
+
+      # 5. Build Project
+      - name: Build Project
+        run: npm run build
+
+      # 6. Run Tests (if applicable)
+      - name: Run Tests
+        run: npm test
+        continue-on-error: false # Make workflow fail if tests fail
+
+      # 7. Deploy to GitHub Pages (Optional)
+      - name: Deploy to GitHub Pages
+        if: github.ref == 'refs/heads/main'
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./dist
